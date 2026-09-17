@@ -27,7 +27,6 @@ void printWordWithDefinition(Word wordObject) {
   /* I know this is totally not required for this exercise, but I
     was really annoyed with different words not being aligned correctly!
   */
-  print('called');
   final String word = wordObject.word;
   final String definition = wordObject.definition;
 
@@ -40,7 +39,7 @@ void printWordWithDefinition(Word wordObject) {
 
   print('${'Word'.padRight(columnWidth)}  Definition');
   print('${'-' * columnWidth}  ${'-' * definitionWidth}');
-  print('$paddedWord  $definition');
+  print('$paddedWord  $definition\n');
 }
 
 Future<void> searchWord(String word) async {
@@ -52,14 +51,12 @@ Future<void> searchWord(String word) async {
       switch (statusCode) {
         case HTTP_OK:
           final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-          if (jsonResponse.isEmpty) {
+          if (jsonResponse.isEmpty || jsonResponse['entries'].isEmpty) {
             print('The word "$word" was not found in the dictionary. You must be special lol');
             return;
           }
 
-          print('The word "$word" was found in the dictionary!');
           final Word wordObject = Word.fromJson(jsonResponse);
-          print(wordObject);
           printWordWithDefinition(wordObject);
           break;
         case HTTP_NOT_FOUND:
@@ -77,7 +74,7 @@ Future<void> searchWord(String word) async {
 
 }
 
-void main(List<String> arguments) {
+Future<void> main(List<String> arguments) async {
   bool hasInitialized = false;
 
   while (true) {
@@ -90,6 +87,8 @@ void main(List<String> arguments) {
     }
 
     String? word = stdin.readLineSync();
+    print('\n');
+
     if (word == null || word.isEmpty) {
       print('My brotha or sista in christ, you didn\'t enter a word. Please try again.');
       continue;
@@ -97,7 +96,7 @@ void main(List<String> arguments) {
       break;
     }
 
-    searchWord(word);
+    await searchWord(word);
   }
 
   print('Exiting the program. Peace nerds!');
